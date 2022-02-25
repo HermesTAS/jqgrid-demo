@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JqGrid</title>
+  <link rel="stylesheet" href="../libraries/jqgrid/560/css/trirand/ui.jqgrid.css">
+  <link rel="stylesheet" href="../libraries/jqgrid/560/css/jquery-ui.css">
+</head>
+
+<body>
+  <a href="../v530">Try version 530</a>
+  <h2>Version: 560 | <span class="keypressed"></span></h2>
+
+  <table id="table"></table>
+  <div id="tablePager"></div>
+
+  <b>Descriptions:</b>
+  <p>To get the issue, you have to click / focus to filterToolbar then click arrowDown on your keyboard</p>
+  <p>On version 530, there should be nothing is gonna happen</p>
+  <p>On version 560, the grid will do an ajax request and reload the grid (this is the problem)</p>
+
+  <script src="../libraries/jqgrid/560/js/jquery.min.js"></script>
+  <script src="../libraries/jqgrid/560/js/trirand/i18n/grid.locale-en.js"></script>
+  <script src="../libraries/jqgrid/560/js/jquery-ui.min.js"></script>
+  <script src="../libraries/jqgrid/560/js/trirand/src/jquery.jqGrid.js"></script>
+  <script>
+    let baseUrl = 'demo.html'
+    let lastSel
+    let indexRow = 0
+
+    let array = [{
+        name: 'Customer 1'
+      },
+      {
+        name: 'Customer 2'
+      }
+    ]
+    console.log(Object.assign({}, array))
+
+    $(document).ready(function() {
+      console.log(baseUrl)
+      $('#table')
+        .jqGrid({
+          url: `${baseUrl}customer/get`,
+          datatype: 'json',
+          data: array,
+          caption: "Customers Data",
+          responsive: true,
+          rownumbers: true,
+          height: 277,
+          autowidth: true,
+          shrinkToFit: false,
+          viewrecords: true,
+          sortable: true,
+          gridview: true,
+          // cellEdit: true,
+          // cellurl: `${baseUrl}/customer/update`,
+          // cellsubmit: 'clientArray',
+          pager: $("#tablePager"),
+          colModel: [{
+              index: 'name',
+              name: 'name',
+              label: 'Name',
+              editable: true,
+            },
+            {
+              index: 'phone',
+              name: 'phone',
+              label: 'Phone',
+              editable: true,
+              editoptions: {
+                maxlength: '13'
+              }
+            },
+            {
+              index: 'address',
+              name: 'address',
+              label: 'Address',
+              editable: true,
+              edittype: 'textarea',
+            },
+            {
+              index: 'name',
+              name: 'name',
+              label: 'Name',
+              editable: true,
+            },
+            {
+              index: 'phone',
+              name: 'phone',
+              label: 'Phone',
+              editable: true,
+              editoptions: {
+                maxlength: '13'
+              }
+            },
+            {
+              index: 'address',
+              name: 'address',
+              label: 'Address',
+              editable: true,
+              edittype: 'textarea',
+            },
+            {
+              index: 'name',
+              name: 'name',
+              label: 'Name',
+              editable: true,
+            },
+            {
+              index: 'phone',
+              name: 'phone',
+              label: 'Phone',
+              editable: true,
+              editoptions: {
+                maxlength: '13'
+              }
+            },
+            {
+              index: 'address',
+              name: 'address',
+              label: 'Address',
+              editable: true,
+              edittype: 'textarea',
+            },
+          ],
+          onSelectRow: function(id) {
+            console.log('selected');
+            indexRow = $(this).jqGrid("getCell", id, "rn") - 1;
+            console.log(indexRow)
+          },
+          loadComplete: function() {
+            setTimeout(() => {
+              $("#" + $("#table").getDataIDs()[indexRow] + " td")[1].click()
+              console.log('clicked')
+            }, 0);
+          },
+          afterEditCell: function(rowid, cellname, value, iRow, iCol) {
+            indexRow = iRow - 1
+          }
+        })
+
+        .jqGrid("navGrid", '#tablePager')
+
+        .navButtonAdd('#tablePager', {
+          caption: 'Save changes',
+          title: 'Save changes',
+          id: 'saveChanges',
+          onClickButton: function() {
+            let changedCells = $('#table').getChangedCells('dirty')
+
+            $.ajax({
+              url: `${baseUrl}customer/update`,
+              method: 'POST',
+              dataType: 'JSON',
+              data: Object.assign({}, changedCells),
+              success: res => {
+                console.log(indexRow)
+                alert(res)
+                $("#" + $("#table").getDataIDs()[indexRow] + " td")[1].click()
+              }
+            })
+          }
+        })
+
+        .jqGrid('filterToolbar', {
+          searchOnEnter: false,
+        })
+
+      // .excelLikeGrid()
+      // .bindKeys()
+
+      /*
+       * To highlight current row for selected column
+       * when .excelLikeGrid() is activated
+       */
+      $(document).on('keydown click', function() {
+        $('tr:not(:has(> td.ui-state-highlight))').css({
+          background: 'none',
+        })
+
+        $('tr:has(> td.ui-state-highlight)').css({
+          background: '#f8da4e',
+        })
+      })
+
+    })
+
+    $(document).on('keydown', function(event) {
+      $('.keypressed').html('')
+
+      setTimeout(() => {
+        $('.keypressed').html(
+          `Keypressed: ${event.key}`
+        )
+      }, 100)
+    })
+  </script>
+
+</body>
+
+</html>
